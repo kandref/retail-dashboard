@@ -177,6 +177,7 @@ export interface SalesTrendItem {
 
 export interface RAPerformanceItem {
   name: string;
+  siteName: string;
   revenue: number;
   target: number;
   achievement: number;
@@ -470,12 +471,16 @@ export function getMockDashboardData(userSubDistrict?: string, filters?: Dashboa
   // Hitung RA Performance (scaled) - termasuk semua RA di subdistrict
   const raRevenue = new Map<string, number>();
   const raTarget = new Map<string, number>();
+  const raSiteName = new Map<string, string>();
 
   // Daftarkan semua RA dan sum monthly targets (deduplicated per RA per month)
   const raTargetMonthly = new Map<string, Map<string, number>>();
   csvData.forEach(row => {
     if (row.EMPLOYEE_NAME && !raRevenue.has(row.EMPLOYEE_NAME)) {
       raRevenue.set(row.EMPLOYEE_NAME, 0);
+    }
+    if (row.EMPLOYEE_NAME && row.SITE_NAME && !raSiteName.get(row.EMPLOYEE_NAME)) {
+      raSiteName.set(row.EMPLOYEE_NAME, row.SITE_NAME);
     }
     if (row.EMPLOYEE_NAME && row.SHIPPING_DATE && row.SALES_TARGET_UNIQ > 0) {
       const monthKey = row.SHIPPING_DATE.split(' ')[0].substring(0, 7);
@@ -501,7 +506,7 @@ export function getMockDashboardData(userSubDistrict?: string, filters?: Dashboa
     .map(([name, revenue]) => {
       const raTargetVal = raTarget.get(name) || 0;
       const achievement = raTargetVal > 0 ? (revenue / raTargetVal) * 100 : 0;
-      return { name, revenue, target: Math.round(raTargetVal), achievement: parseFloat(achievement.toFixed(1)) };
+      return { name, siteName: raSiteName.get(name) || '', revenue, target: Math.round(raTargetVal), achievement: parseFloat(achievement.toFixed(1)) };
     })
     .sort((a, b) => b.revenue - a.revenue);
 
@@ -707,11 +712,17 @@ export function getMockDashboardData(userSubDistrict?: string, filters?: Dashboa
   };
 
   // Calculate RA Monthly Achievement (Q1: January, February, March)
+  // Apply only the idRa filter (not date/product filters) so monthly view stays consistent
+  let raMonthlyBase = [...baseData];
+  if (filters?.idRa && filters.idRa !== 'All') {
+    raMonthlyBase = raMonthlyBase.filter(row => row.EMPLOYEE_NAME === filters.idRa);
+  }
+
   const monthNames = ['Jan', 'Feb', 'Mar'];
   const raMonthlyMap = new Map<string, { months: Map<number, { sales: number; target: number }> }>();
 
   // Initialize all RAs with empty monthly data
-  baseData.forEach(row => {
+  raMonthlyBase.forEach(row => {
     if (row.EMPLOYEE_NAME && !raMonthlyMap.has(row.EMPLOYEE_NAME)) {
       raMonthlyMap.set(row.EMPLOYEE_NAME, {
         months: new Map([
@@ -724,7 +735,7 @@ export function getMockDashboardData(userSubDistrict?: string, filters?: Dashboa
   });
 
   // Aggregate sales (positive only) and targets by RA and month
-  const basePositive = baseData.filter(row => row.TOTAL_QTY > 0);
+  const basePositive = raMonthlyBase.filter(row => row.TOTAL_QTY > 0);
   basePositive.forEach(row => {
     if (!row.EMPLOYEE_NAME || !row.SHIPPING_DATE) return;
 

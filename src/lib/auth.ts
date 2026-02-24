@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 // In production, this would come from a database
 // Store configuration based on SUB_DISTRICT from CSV
 const stores: Record<string, { password: string; storeName: string; subDistrict: string }> = {
+  'ADMIN': { password: bcrypt.hashSync('admin@2025', 10), storeName: 'Administrator - All Regions', subDistrict: '' },
   'DKI01': { password: bcrypt.hashSync('dki01', 10), storeName: 'DKI 01 - Jakarta Pusat', subDistrict: 'DKI 01' },
   'DKI02': { password: bcrypt.hashSync('dki02', 10), storeName: 'DKI 02 - Jakarta Timur & Bekasi', subDistrict: 'DKI 02' },
   'DKI03': { password: bcrypt.hashSync('dki03', 10), storeName: 'DKI 03 - Tangerang & Serang', subDistrict: 'DKI 03' },

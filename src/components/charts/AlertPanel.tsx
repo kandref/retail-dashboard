@@ -23,8 +23,11 @@ interface Alert {
   detail: string;
 }
 
+const PREVIEW_COUNT = 5;
+
 export default function AlertPanel({ raPerformance, targetProgress }: AlertPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [showAll, setShowAll] = useState(false);
 
   const alerts: Alert[] = [];
 
@@ -97,7 +100,18 @@ export default function AlertPanel({ raPerformance, targetProgress }: AlertPanel
       {/* Alerts List */}
       {isExpanded && (
         <div className="px-6 pb-4 space-y-2">
-          {alerts.map((alert, idx) => (
+          {showAll && alerts.length > PREVIEW_COUNT && (
+            <button
+              onClick={() => setShowAll(false)}
+              className="w-full flex items-center justify-center gap-2 py-1 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+              </svg>
+              Sembunyikan
+            </button>
+          )}
+          {(showAll ? alerts : alerts.slice(0, PREVIEW_COUNT)).map((alert, idx) => (
             <div
               key={idx}
               className={`rounded-lg p-3 flex items-start gap-3 ${
@@ -119,6 +133,29 @@ export default function AlertPanel({ raPerformance, targetProgress }: AlertPanel
               </div>
             </div>
           ))}
+
+          {alerts.length > PREVIEW_COUNT && (
+            <button
+              onClick={() => setShowAll(prev => !prev)}
+              className="w-full flex items-center justify-center gap-2 pt-1 pb-1 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+            >
+              {showAll ? (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                  </svg>
+                  Sembunyikan
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                  Tampilkan {alerts.length - PREVIEW_COUNT} alert lainnya
+                </>
+              )}
+            </button>
+          )}
         </div>
       )}
     </div>
