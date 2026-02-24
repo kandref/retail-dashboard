@@ -45,6 +45,8 @@ interface FilterPanelProps {
 }
 
 export default function FilterPanel({ options, values, onChange, isOpen, onToggle }: FilterPanelProps) {
+  const [raSearch, setRaSearch] = useState('');
+
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     date: true,
     location: true,
@@ -283,10 +285,10 @@ export default function FilterPanel({ options, values, onChange, isOpen, onToggl
             <div className="py-3">
               <FilterSelect label="Material Type" field="materialType" options={options.materialType} />
               <FilterSelect label="Product Type" field="productType" options={options.productType} />
-              <FilterSelect label="MGH 1" field="mgh1" options={options.mgh1} />
-              <FilterSelect label="MGH 2" field="mgh2" options={options.mgh2} />
-              <FilterSelect label="MGH 3" field="mgh3" options={options.mgh3} />
-              <FilterSelect label="MGH 4" field="mgh4" options={options.mgh4} />
+              <FilterSelect label="Brand" field="mgh1" options={options.mgh1} />
+              <FilterSelect label="Line" field="mgh2" options={options.mgh2} />
+              <FilterSelect label="Collection" field="mgh3" options={options.mgh3} />
+              <FilterSelect label="Style" field="mgh4" options={options.mgh4} />
             </div>
           )}
 
@@ -319,7 +321,46 @@ export default function FilterPanel({ options, values, onChange, isOpen, onToggl
           />
           {expandedSections.employee && (
             <div className="py-3">
-              <FilterSelect label="Employee" field="idRa" options={options.idRa} />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Employee</label>
+              <div className="relative mb-2">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Cari employee..."
+                  value={raSearch}
+                  onChange={(e) => setRaSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-3 lg:py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                />
+                {raSearch && (
+                  <button
+                    onClick={() => setRaSearch('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              <select
+                value={values.idRa}
+                onChange={(e) => handleChange('idRa', e.target.value)}
+                size={Math.min(6, (raSearch ? options.idRa.filter(o => o.toLowerCase().includes(raSearch.toLowerCase())) : options.idRa).length + 1)}
+                className="w-full px-3 py-1 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              >
+                <option value="All">All</option>
+                {(raSearch
+                  ? options.idRa.filter(o => o.toLowerCase().includes(raSearch.toLowerCase()))
+                  : options.idRa
+                ).map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+              {raSearch && options.idRa.filter(o => o.toLowerCase().includes(raSearch.toLowerCase())).length === 0 && (
+                <p className="text-xs text-gray-400 mt-1 text-center">Tidak ada hasil</p>
+              )}
             </div>
           )}
 

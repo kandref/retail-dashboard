@@ -60,6 +60,9 @@ export default function AIInsights({
 }: AIInsightsProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [insights, setInsights] = useState<string[]>([]);
+  const [expanded, setExpanded] = useState(false);
+
+  const PREVIEW_COUNT = 5;
 
   useEffect(() => {
     setIsAnalyzing(true);
@@ -261,7 +264,7 @@ export default function AIInsights({
         </div>
       ) : (
         <div className="space-y-3">
-          {insights.map((insight, index) => (
+          {(expanded ? insights : insights.slice(0, PREVIEW_COUNT)).map((insight, index) => (
             <div
               key={index}
               className="bg-white/70 backdrop-blur-sm rounded-lg p-4 border border-white/50 shadow-sm hover:shadow-md transition-shadow"
@@ -269,6 +272,29 @@ export default function AIInsights({
               <p className="text-gray-700 text-sm leading-relaxed">{insight}</p>
             </div>
           ))}
+
+          {insights.length > PREVIEW_COUNT && (
+            <button
+              onClick={() => setExpanded(prev => !prev)}
+              className="w-full flex items-center justify-center gap-2 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+            >
+              {expanded ? (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                  </svg>
+                  Sembunyikan
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                  Tampilkan {insights.length - PREVIEW_COUNT} insight lainnya
+                </>
+              )}
+            </button>
+          )}
         </div>
       )}
 

@@ -1,10 +1,5 @@
 @import "tailwindcss";
 
-/* Override Tailwind v4 preflight: keep default arrow cursor on buttons */
-button, [role="button"] {
-  cursor: default;
-}
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
