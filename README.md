@@ -1,12 +1,12 @@
 # Retail Analytics Dashboard
 
-Dashboard analitik retail berbasis web untuk memantau performa penjualan toko outdoor/adventure. Dibangun dengan Next.js 16 App Router, Tailwind CSS v4, dan Recharts.
+A web-based retail analytics dashboard for monitoring sales performance of outdoor/adventure stores. Built with Next.js 16 App Router, Tailwind CSS v4, and Recharts.
 
-## Gambaran Umum
+## Overview
 
-Aplikasi ini dirancang untuk membantu store manager dan regional manager memantau KPI toko secara real-time — mulai dari pencapaian target penjualan, performa RA (Retail Associate), hingga tren penjualan harian/bulanan/tahunan.
+This application helps store managers and regional managers monitor store KPIs in real-time — from sales target achievement and Retail Associate (RA) performance to daily/monthly/yearly sales trends.
 
-Merek fiktif yang digunakan:
+Fictional brands used:
 - **Summit Gear** — outdoor & adventure
 - **Nomad Co** — lifestyle
 - **Basecamp** — urban tech
@@ -15,18 +15,18 @@ Merek fiktif yang digunakan:
 
 ## Tech Stack
 
-| Teknologi | Versi | Kegunaan |
+| Technology | Version | Purpose |
 |---|---|---|
-| Next.js | 16 (App Router) | Framework utama |
+| Next.js | 16 (App Router) | Main framework |
 | TypeScript | 5 | Type safety |
 | Tailwind CSS | v4 | Styling |
-| Recharts | latest | Visualisasi data |
-| NextAuth | v4 | Autentikasi |
-| BigQuery | — | Data source (produksi) |
+| Recharts | latest | Data visualization |
+| NextAuth | v4 | Authentication |
+| BigQuery | — | Data source (production) |
 
 ---
 
-## Cara Menjalankan
+## Getting Started
 
 ### 1. Install dependencies
 
@@ -34,32 +34,32 @@ Merek fiktif yang digunakan:
 npm install
 ```
 
-### 2. Setup environment variables
+### 2. Set up environment variables
 
-Buat file `.env.local` di root project:
+Create a `.env.local` file in the project root:
 
 ```env
 NEXTAUTH_SECRET=your_secret_here
 NEXTAUTH_URL=http://localhost:3000
 
-# Opsional — hanya diperlukan untuk mode produksi (BigQuery)
+# Optional — only required for production mode (BigQuery)
 GOOGLE_CLOUD_PROJECT=your_gcp_project_id
 GOOGLE_APPLICATION_CREDENTIALS=./path/to/service-account.json
 BIGQUERY_DATASET=retail_analytics
 BIGQUERY_SALES_TABLE=sales_data
 ```
 
-> Jika `GOOGLE_CLOUD_PROJECT` tidak di-set, aplikasi otomatis menggunakan data dummy dari CSV.
+> If `GOOGLE_CLOUD_PROJECT` is not set, the app automatically uses dummy data from the local CSV file.
 
-### 3. Jalankan development server
+### 3. Run the development server
 
 ```bash
 npm run dev
 ```
 
-Buka [http://localhost:3000](http://localhost:3000) di browser.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Login untuk testing
+### Test credentials
 
 | Store ID | Password |
 |---|---|
@@ -69,78 +69,78 @@ Buka [http://localhost:3000](http://localhost:3000) di browser.
 
 ---
 
-## Struktur Proyek
+## Project Structure
 
 ```
 retail-dashboard/
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   └── dashboard/route.ts   # API endpoint utama dashboard
+│   │   │   └── dashboard/route.ts   # Main dashboard API endpoint
 │   │   ├── dashboard/
-│   │   │   └── page.tsx             # Halaman dashboard (client component)
-│   │   └── page.tsx                 # Halaman login/redirect
+│   │   │   └── page.tsx             # Dashboard page (client component)
+│   │   └── page.tsx                 # Login/redirect page
 │   ├── components/
-│   │   ├── charts/                  # Komponen chart (KPI, trend, RA, dsb.)
-│   │   ├── FilterPanel.tsx          # Panel filter sidebar (cascading)
-│   │   └── SessionProvider.tsx      # Wrapper NextAuth session
+│   │   ├── charts/                  # Chart components (KPI, trend, RA, etc.)
+│   │   ├── FilterPanel.tsx          # Sidebar filter panel (cascading)
+│   │   └── SessionProvider.tsx      # NextAuth session wrapper
 │   ├── lib/
-│   │   ├── auth.ts                  # Konfigurasi NextAuth
+│   │   ├── auth.ts                  # NextAuth configuration
 │   │   └── bigquery.ts              # Data layer (BigQuery + CSV mock)
-│   └── dummy tagging new.csv        # Data dummy (~9.700 baris)
+│   └── dummy tagging new.csv        # Dummy data (~9,700 rows)
 ├── scripts/
-│   └── generate-data.js             # Script regenerasi data dummy
-├── CLAUDE.md                        # Panduan untuk Claude Code AI
+│   └── generate-data.js             # Script to regenerate dummy CSV data
+├── CLAUDE.md                        # Guidance file for Claude Code AI
 └── README.md
 ```
 
 ---
 
-## Alur Data
+## Data Flow
 
 ```
 Login (NextAuth)
-    └─▶ Session JWT (storeId, storeName, subDistrict)
+    └─▶ JWT Session (storeId, storeName, subDistrict)
             └─▶ GET /api/dashboard?filters...
                     ├─▶ [Dev]  getMockDashboardData() ← CSV parsing
                     └─▶ [Prod] getStoreDashboardData() ← BigQuery query
 ```
 
-1. **Autentikasi**: User login dengan Store ID sebagai username. Session JWT menyimpan `storeId`, `storeName`, dan `subDistrict` untuk scoping data.
-2. **API Dashboard**: Satu endpoint GET yang mendeteksi environment dan mendelegasikan ke data source yang sesuai.
-3. **Data Layer**: Mode dev menggunakan CSV lokal dengan `SCALE_MULTIPLIER = 75`. Mode prod menggunakan BigQuery.
-4. **Cascading Filters**: Filter berjenjang — setiap level filter membatasi opsi filter di bawahnya (Regional → Sub-district → Channel → Site → dst.).
+1. **Authentication**: Users log in with their Store ID. The JWT session carries `storeId`, `storeName`, and `subDistrict` for data scoping.
+2. **Dashboard API**: A single GET endpoint that detects the environment and delegates to the appropriate data source.
+3. **Data Layer**: Dev mode uses a local CSV file with `SCALE_MULTIPLIER = 75`. Production mode uses BigQuery.
+4. **Cascading Filters**: Hierarchical filters — each level restricts the options for the level below it (Regional → Sub-district → Channel → Site → and so on).
 
 ---
 
-## Fitur Utama
+## Features
 
-- **KPI Cards** — Total penjualan, target, achievement %, UPT, basket size, revenue per RA
-- **Sales Trend Chart** — Line/bar chart dengan toggle granularitas (harian / bulanan / tahunan)
-- **RA Performance Chart** — Perbandingan performa antar Retail Associate
-- **Achievement Gauge** — Visualisasi pencapaian target dalam bentuk gauge
-- **RA Monthly Achievement** — Tabel pencapaian bulanan per RA
-- **AI Insights** — Analisis otomatis berbasis aturan (rule-based, bukan LLM)
-- **Transaction Table** — Detail transaksi dengan pagination
-- **Cascading Filter Panel** — Filter multi-level yang saling berhubungan
-- **Forecasting** — Proyeksi penjualan berdasarkan tren historis
+- **KPI Cards** — Total sales, target, achievement %, UPT, basket size, revenue per RA
+- **Sales Trend Chart** — Line/bar chart with granularity toggle (daily / monthly / yearly)
+- **RA Performance Chart** — Performance comparison across Retail Associates
+- **Achievement Gauge** — Target achievement visualized as a gauge
+- **RA Monthly Achievement** — Monthly achievement table per RA
+- **AI Insights** — Automated rule-based analysis (not LLM-based)
+- **Transaction Table** — Detailed transactions with pagination
+- **Cascading Filter Panel** — Multi-level interdependent filters
+- **Forecasting** — Sales projection based on historical trends
 
 ---
 
 ## Scripts
 
 ```bash
-npm run dev          # Development server
+npm run dev          # Start development server
 npm run build        # Production build
-npm run lint         # Lint dengan ESLint (flat config)
-node scripts/generate-data.js   # Regenerasi data dummy CSV
+npm run lint         # Lint with ESLint (flat config)
+node scripts/generate-data.js   # Regenerate dummy CSV data
 ```
 
 ---
 
-## Catatan Teknis
+## Technical Notes
 
-- Semua nilai moneter menggunakan format **IDR (Rupiah)** dengan locale `id-ID`
-- Path alias `@/*` → `./src/*` (dikonfigurasi di `tsconfig.json`)
-- CSV di-parse berdasarkan **index kolom** (bukan nama header) — perubahan urutan kolom akan merusak parsing
-- UI menggunakan campuran Bahasa Indonesia dan Inggris
+- All monetary values use **IDR (Indonesian Rupiah)** format with `id-ID` locale
+- Path alias `@/*` → `./src/*` (configured in `tsconfig.json`)
+- The CSV is parsed by **column index**, not header name — reordering columns will break parsing
+- UI text mixes Indonesian and English
